@@ -54,6 +54,7 @@ tests_require = [
     "pytest-invenio~=1.0,>=1.0.5",
     "redis>=2.10.5",
     "invenio-app~=1.0,>=1.0.0",
+    "factory_boy~=2.11.1,>=2.11.1",
 ]
 
 extras_require = {"docs": docs_require, "tests": tests_require}

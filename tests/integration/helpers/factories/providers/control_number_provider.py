@@ -20,6 +20,13 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
+import random
 
-from __future__ import absolute_import, division, print_function
+from faker.providers import BaseProvider
+
+MAX_ES_INT = 2147483647
+
+
+class ControlNumberProvider(BaseProvider):
+    def control_number(self):
+        return random.randint(1, MAX_ES_INT)

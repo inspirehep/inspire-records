@@ -20,15 +20,10 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
+from faker import Faker
 
-from __future__ import absolute_import, division, print_function
+from helpers.factories.providers.control_number_provider import ControlNumberProvider
 
-import pytest
+faker = Faker()
 
-from invenio_app.factory import create_app as invenio_create_app
-
-
-@pytest.fixture(scope="module")
-def create_app():
-    return invenio_create_app
+faker.add_provider(ControlNumberProvider)

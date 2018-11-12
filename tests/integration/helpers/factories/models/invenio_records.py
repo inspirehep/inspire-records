@@ -20,17 +20,26 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
+import random
+import factory
+import pytest
 
-from __future__ import absolute_import, division, print_function
+from invenio_records.models import RecordMetadata
+
+from helpers.factories.models.base import BaseFactory
+from helpers.factories.providers.faker import faker
 
 
-class InspireRecords(object):
-    """Flask extension."""
+class RecordMetadataFactory(BaseFactory):
+    class Meta:
+        model = RecordMetadata
 
-    def __init__(self, app=None):
-        if app:
-            self.init_app(app)
-
-    def init_app(self, app):
-        app.extensions["inspire_records"] = self
+    json = factory.Dict(
+        {
+            "$schema": "http://localhost:5000/schemas/record/hep.json",
+            "titles": factory.List([factory.Dict({"title": faker.sentence()})]),
+            "document_type": ["article"],
+            "_collections": ["Literature"],
+            "control_number": faker.control_number(),
+        }
+    )

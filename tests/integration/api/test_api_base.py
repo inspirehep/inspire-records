@@ -24,9 +24,24 @@
 
 from __future__ import absolute_import, division, print_function
 
-import pytest
+from inspire_records.api import InspireRecord
+
+from helpers.factories.models.invenio_records import RecordMetadataFactory
 
 
-@pytest.fixture(scope="module")
-def app_config(app_config):
-    return app_config
+def test_base_get_record(base_app, db):
+    record = RecordMetadataFactory()
+
+    expected_record = InspireRecord.get_record(record.id)
+
+    assert expected_record == record.json
+
+
+def test_base_get_records(base_app, db):
+    records = RecordMetadataFactory.create_batch(20)
+    record_uuids = [record.id for record in records]
+
+    expected_records = InspireRecord.get_records(record_uuids)
+
+    for record in records:
+        assert record.json in expected_records

@@ -24,10 +24,24 @@
 
 from __future__ import absolute_import, division, print_function
 
-from inspire_records.api import InspireRecord
+from inspire_records.api import LiteratureRecord
+
+from helpers.factories.models.invenio_records import RecordMetadataFactory
 
 
 def test_base_get_record(base_app, db):
-    expected_record = InspireRecord.create({"title": "hello"})
-    result_record = InspireRecord.get_record(expected_record.id)
-    assert expected_record == result_record
+    record = RecordMetadataFactory()
+
+    expected_record = LiteratureRecord.get_record(record.id)
+
+    assert expected_record == record.json
+
+
+def test_base_get_records(base_app, db):
+    records = RecordMetadataFactory.create_batch(20)
+    record_uuids = [record.id for record in records]
+
+    expected_records = LiteratureRecord.get_records(record_uuids)
+
+    for record in records:
+        assert record.json in expected_records

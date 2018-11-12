@@ -20,17 +20,10 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
-
-from __future__ import absolute_import, division, print_function
+import factory
 
 
-class InspireRecords(object):
-    """Flask extension."""
-
-    def __init__(self, app=None):
-        if app:
-            self.init_app(app)
-
-    def init_app(self, app):
-        app.extensions["inspire_records"] = self
+class BaseFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        abstract = True
+        sqlalchemy_session_persistence = "commit"
