@@ -20,10 +20,7 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from faker import Faker
+from __future__ import absolute_import, division, print_function
 
-from helpers.factories.providers.control_number_provider import ControlNumberProvider
-
-faker = Faker()
-
-faker.add_provider(ControlNumberProvider)
+from .base import PidStoreBase
+from .literature import PidStoreLiterature

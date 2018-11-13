@@ -24,16 +24,12 @@
 
 from __future__ import absolute_import, division, print_function
 
+import pytest
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+from faker import Faker
 
+from helpers.providers.record_provider import RecordProvider
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+faker = Faker()
 
-    pid_type = "lit"
-
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+faker.add_provider(RecordProvider)

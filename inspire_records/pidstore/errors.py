@@ -20,20 +20,16 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
-
 from __future__ import absolute_import, division, print_function
 
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+class BaseInspirePidStoreError(Exception):
+    pass
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+class MissingSchema(BaseInspirePidStoreError):
+    pass
 
-    pid_type = "lit"
 
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+class MissingControlNumber(BaseInspirePidStoreError):
+    pass

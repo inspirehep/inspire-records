@@ -20,6 +20,12 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+"""INSPIRE module that adds more fun to the platform."""
+
+from __future__ import absolute_import, division, print_function
+
+import pytest
+
 import factory
 
 

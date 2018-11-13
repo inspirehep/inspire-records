@@ -24,16 +24,4 @@
 
 from __future__ import absolute_import, division, print_function
 
-
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
-
-
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
-
-    pid_type = "lit"
-
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+import pytest

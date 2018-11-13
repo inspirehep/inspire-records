@@ -24,16 +24,18 @@
 
 from __future__ import absolute_import, division, print_function
 
+import pytest
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+from inspire_records.pidstore.api import PidStoreBase
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+def test_get_config_for_endpoints(appctx):
+    pids_to_endpoints = PidStoreBase._get_config_pid_types_to_endpoints()
 
-    pid_type = "lit"
+    assert pids_to_endpoints is not None
 
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+
+def test_get_config_for_schema(appctx):
+    pids_to_endpoints = PidStoreBase._get_config_pid_types_to_schema()
+
+    assert pids_to_endpoints is not None

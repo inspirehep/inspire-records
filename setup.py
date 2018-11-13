@@ -34,12 +34,16 @@ readme = open("README.rst").read()
 setup_requires = ["autosemver~=0.0,>=0.5.3", "pre-commit~=1.11.0,>=1.11.0"]
 
 install_requires = [
+    # because of inspire-dojson fix that :(
+    "Flask~=0.0,>=0.12.3",
     "invenio-records-files>=1.0.0a10",
+    "invenio-jsonschemas~=1.0,>=1.0.0",
     "invenio-db[postgresql,versioning]~=1.0,>=1.0.0",
     "inspire-schemas~=58.0,>=58.0.0",
     "invenio-indexer~=1.0,>=1.0.0",
     "invenio-search[elasticsearch5]~=1.0,>=1.0.0",
     "invenio-cache~=1.0,>=1.0.0",
+    "inspire-dojson~=60.0,>=60.0.6",
 ]
 
 docs_require = []
@@ -55,6 +59,7 @@ tests_require = [
     "redis>=2.10.5",
     "invenio-app~=1.0,>=1.0.0",
     "factory_boy~=2.11.1,>=2.11.1",
+    "requests-mock~=1.5.2,>=1.5.2",
 ]
 
 extras_require = {"docs": docs_require, "tests": tests_require}
@@ -84,7 +89,11 @@ setup(
     tests_require=tests_require,
     extras_require=extras_require,
     entry_points={
-        "invenio_jsonschemas.schemas": ["inspire_records_schemas = inspire_schemas"]
+        "invenio_base.apps": ["inspire_records = inspire_records.ext:InspireRecords"],
+        "invenio_base.api_apps": [
+            "inspire_records = inspire_records.ext:InspireRecords"
+        ],
+        "invenio_jsonschemas.schemas": ["inspire_records_schemas = inspire_schemas"],
     },
     classifiers=[
         "Development Status :: 1 - Planning",

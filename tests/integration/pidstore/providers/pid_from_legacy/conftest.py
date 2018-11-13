@@ -24,16 +24,10 @@
 
 from __future__ import absolute_import, division, print_function
 
-
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+import pytest
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
-
-    pid_type = "lit"
-
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+@pytest.fixture(scope="module")
+def app_config(app_config):
+    app_config.update({"LEGACY_PID_PROVIDER": "http://someurl.com"})
+    return app_config

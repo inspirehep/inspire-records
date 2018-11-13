@@ -20,6 +20,10 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+"""INSPIRE module that adds more fun to the platform."""
+
+from __future__ import absolute_import, division, print_function
+
 import random
 import factory
 import pytest
@@ -27,19 +31,18 @@ import pytest
 from invenio_records.models import RecordMetadata
 
 from helpers.factories.models.base import BaseFactory
-from helpers.factories.providers.faker import faker
+from helpers.providers.faker import faker
 
 
 class RecordMetadataFactory(BaseFactory):
     class Meta:
         model = RecordMetadata
 
-    json = factory.Dict(
-        {
-            "$schema": "http://localhost:5000/schemas/record/hep.json",
-            "titles": factory.List([factory.Dict({"title": faker.sentence()})]),
-            "document_type": ["article"],
-            "_collections": ["Literature"],
-            "control_number": faker.control_number(),
-        }
-    )
+    @classmethod
+    def _adjust_kwargs(cls, **kwargs):
+        data = kwargs.pop("data", None)
+        if data:
+            kwargs["json"].update(data)
+        return kwargs
+
+    json = factory.Dict(faker.record(with_control_number=True))
