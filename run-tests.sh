@@ -22,5 +22,5 @@
 
 set -e
 
-flake8 inspire_records tests
-py.test tests
+pytest tests/unit
+pytest tests/integration

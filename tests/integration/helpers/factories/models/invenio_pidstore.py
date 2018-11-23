@@ -20,13 +20,23 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+"""INSPIRE module that adds more fun to the platform."""
+
+from __future__ import absolute_import, division, print_function
+
 import random
+import factory
+import pytest
 
-from faker.providers import BaseProvider
+from invenio_pidstore.models import PIDStatus, PersistentIdentifier
 
-MAX_ES_INT = 2147483647
+from helpers.factories.models.base import BaseFactory
+from helpers.providers.faker import faker
 
 
-class ControlNumberProvider(BaseProvider):
-    def control_number(self):
-        return random.randint(1, MAX_ES_INT)
+class PersistentIdentifierFactory(BaseFactory):
+    class Meta:
+        model = PersistentIdentifier
+
+    object_type = "rec"
+    status = PIDStatus.REGISTERED

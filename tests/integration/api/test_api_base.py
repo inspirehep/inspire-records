@@ -24,24 +24,83 @@
 
 from __future__ import absolute_import, division, print_function
 
+import pytest
+
+from invenio_records.models import RecordMetadata
+from invenio_pidstore.models import PersistentIdentifier, RecordIdentifier
+
 from inspire_records.api import InspireRecord
 
-from helpers.factories.models.invenio_records import RecordMetadataFactory
+from helpers.providers.faker import faker
 
 
-def test_base_get_record(base_app, db):
-    record = RecordMetadataFactory()
+def test_base_get_record(base_app, db, create_record):
+    record = create_record("lit")
 
     expected_record = InspireRecord.get_record(record.id)
 
     assert expected_record == record.json
 
 
-def test_base_get_records(base_app, db):
-    records = RecordMetadataFactory.create_batch(20)
+def test_base_get_records(base_app, db, create_record):
+    records = [create_record("lit")]
     record_uuids = [record.id for record in records]
 
     expected_records = InspireRecord.get_records(record_uuids)
 
     for record in records:
         assert record.json in expected_records
+
+
+def test_get_uuid_from_pid_value(base_app, db, create_record):
+    record = create_record("lit")
+    record_uuid = record.id
+    record_pid_type = record._persistent_identifier.pid_type
+    record_pid_value = record._persistent_identifier.pid_value
+
+    expected_record_uuid = InspireRecord.get_uuid_from_pid_value(
+        record_pid_value, pid_type=record_pid_type
+    )
+
+    assert expected_record_uuid == record_uuid
+
+
+def test_soft_delete_record(base_app, db, create_record):
+    record_factory = create_record("lit")
+    record_uuid = record_factory.id
+    record = InspireRecord.get_record(record_uuid)
+    record.delete()
+    record_pid = PersistentIdentifier.query.filter_by(
+        object_uuid=record.id
+    ).one_or_none()
+
+    assert "deleted" in record
+    assert record_pid is None
+
+
+def test_hard_delete_record(base_app, db, create_record, create_pidstore):
+    record_factory = create_record("lit")
+    create_pidstore(record_factory.id, "pid1", faker.control_number())
+    create_pidstore(record_factory.id, "pid2", faker.control_number())
+    create_pidstore(record_factory.id, "pid3", faker.control_number())
+
+    pid_value_rec = record_factory.json["control_number"]
+    record_uuid = record_factory.id
+    record = InspireRecord.get_record(record_uuid)
+    record_pids = PersistentIdentifier.query.filter_by(object_uuid=record.id).all()
+
+    assert 4 == len(record_pids)
+    assert record_factory.json == record
+
+    record.hard_delete()
+    record = RecordMetadata.query.filter_by(id=record_uuid).one_or_none()
+    record_pids = PersistentIdentifier.query.filter_by(
+        object_uuid=record_uuid
+    ).one_or_none()
+    record_identifier = RecordIdentifier.query.filter_by(
+        recid=pid_value_rec
+    ).one_or_none()
+
+    assert record is None
+    assert record_pids is None
+    assert record_identifier is None

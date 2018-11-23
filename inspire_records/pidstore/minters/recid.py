@@ -20,20 +20,27 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
-
 from __future__ import absolute_import, division, print_function
 
+from ..providers.recid import InspireRecordIdProvider
+from ..errors import MissingSchema
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
 
+def recid_minter(record_uuid, data, pid_type, object_type):
+    """Mint record identifiers."""
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+    if "$schema" not in data:
+        raise MissingSchema
 
-    pid_type = "lit"
+    args = {
+        "object_type": object_type,
+        "object_uuid": record_uuid,
+        "pid_type": pid_type,
+    }
 
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+    if "control_number" in data:
+        args["pid_value"] = data["control_number"]
+
+    provider = InspireRecordIdProvider.create(**args)
+    data["control_number"] = provider.pid.pid_value
+    return provider.pid

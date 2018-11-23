@@ -24,16 +24,37 @@
 
 from __future__ import absolute_import, division, print_function
 
+import pytest
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+from helpers.factories.models.invenio_records import RecordMetadataFactory
+
+from invenio_pidstore.models import PIDStatus
+
+from inspire_records.pidstore.providers.recid import InspireRecordIdProvider
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+def test_provider_without_pid_value(base_app, db):
+    record = RecordMetadataFactory()
 
-    pid_type = "lit"
+    provide = {"object_type": "rec", "object_uuid": record.id, "pid_type": "something"}
+    provider = InspireRecordIdProvider.create(**provide)
 
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+    assert provider.pid.pid_value
+    assert "something" == provider.pid.pid_type
+    assert PIDStatus.REGISTERED == provider.pid.status
+
+
+def test_provider_with_pid_value(base_app, db):
+    record = RecordMetadataFactory()
+
+    provide = {
+        "object_type": "rec",
+        "object_uuid": record.id,
+        "pid_type": "something",
+        "pid_value": 1,
+    }
+    provider = InspireRecordIdProvider.create(**provide)
+
+    assert provider.pid.pid_value == 1
+    assert "something" == provider.pid.pid_type
+    assert PIDStatus.REGISTERED == provider.pid.status

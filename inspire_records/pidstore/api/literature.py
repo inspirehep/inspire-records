@@ -20,20 +20,16 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
-
 from __future__ import absolute_import, division, print_function
 
+from flask import current_app
+from six.moves.urllib.parse import urlsplit
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+from .base import PidStoreBase
+from ..minters.recid import recid_minter
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+class PidStoreLiterature(PidStoreBase):
 
     pid_type = "lit"
-
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+    minters = [recid_minter]

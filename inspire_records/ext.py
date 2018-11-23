@@ -24,6 +24,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+from . import config
+
 
 class InspireRecords(object):
     """Flask extension."""
@@ -33,4 +35,10 @@ class InspireRecords(object):
             self.init_app(app)
 
     def init_app(self, app):
-        app.extensions["inspire_records"] = self
+        self.init_config(app)
+        app.extensions["inspire-records"] = self
+
+    def init_config(self, app):
+        for k in dir(config):
+            if k.startswith("INSPIRE_RECORDS_"):
+                app.config.setdefault(k, getattr(config, k))

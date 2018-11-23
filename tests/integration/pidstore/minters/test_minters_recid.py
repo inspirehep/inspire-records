@@ -20,20 +20,39 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
-
 from __future__ import absolute_import, division, print_function
 
+import pytest
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+from helpers.factories.models.invenio_records import RecordMetadataFactory
+
+from inspire_records.pidstore.errors import MissingSchema
+from inspire_records.pidstore.minters.recid import recid_minter
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+def test_minter_without_control_number(base_app, db):
+    record = RecordMetadataFactory()
+    data = record.json
 
-    pid_type = "lit"
+    control_number = recid_minter(record.id, data, "pid_type", "rec")
 
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+    assert control_number.pid_value == data["control_number"]
+
+
+def test_minter_with_control_number(base_app, db):
+    record = RecordMetadataFactory()
+    data = record.json
+    data["control_number"] = 1
+
+    control_number = recid_minter(record.id, data, "pid_type", "rec")
+
+    assert control_number.pid_value == 1
+
+
+def test_minter_with_missing_schema_key(base_app, db):
+    record = RecordMetadataFactory()
+    data = record.json
+    del data["$schema"]
+
+    with pytest.raises(MissingSchema):
+        recid_minter(record.id, data, "pid_type", "rec")

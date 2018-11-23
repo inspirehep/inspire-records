@@ -30,6 +30,8 @@ from invenio_app.factory import create_app as invenio_create_app
 
 from helpers.factories.models.base import BaseFactory
 from helpers.factories.models.invenio_records import RecordMetadataFactory
+from helpers.factories.models.invenio_pidstore import PersistentIdentifierFactory
+from helpers.providers.faker import faker
 
 
 @pytest.fixture(scope="module")
@@ -37,6 +39,7 @@ def app_config(app_config):
     # add extra global config if you would like to customize the config
     # for a specific test you can chagne create fixture per-directory
     # using ``conftest.py`` or per-file.
+    app_config["JSONSCHEMAS_HOST"] = "localhost:5000"
     return app_config
 
 
@@ -67,6 +70,7 @@ def db(database):
     # https://github.com/pytest-dev/pytest-factoryboy/issues/11#issuecomment-130521820
     BaseFactory._meta.sqlalchemy_session = session
     RecordMetadataFactory._meta.sqlalchemy_session = session
+    PersistentIdentifierFactory._meta.sqlalchemy_session = session
 
     # `session` is actually a scoped_session. For the `after_transaction_end`
     # event, we need a session instance to listen for, hence the `session()`
@@ -86,3 +90,53 @@ def db(database):
     transaction.rollback()
     connection.close()
     database.session = old_session
+
+
+@pytest.fixture(scope="function")
+def create_record(db, es_clear):
+    """Fixtures to create record.
+
+    Examples:
+
+        def test_with_record(base_app, create_record)
+            record = create_record(
+                'lit',
+                with_pid=True,
+                with_index=False,
+            )
+    """
+
+    def _create_record(record_type, data=None, with_pid=True, with_indexing=False):
+        # FIXME: find a better location
+        MAP_PID_TYPE_TO_INDEX = {"lit": "records-hep"}
+        record = RecordMetadataFactory(data=data)
+
+        if with_pid:
+            record._persistent_identifier = PersistentIdentifierFactory(
+                object_uuid=record.id,
+                pid_type=record_type,
+                pid_value=record.json["control_number"],
+            )
+
+        if with_indexing:
+            index = MAP_PID_TYPE_TO_INDEX[record_type]
+            record._index = es_clear.index(
+                index=index,
+                id=str(record.id),
+                doc_type=index.split("-")[-1],
+                body=record.json,
+                params={},
+            )
+        return record
+
+    return _create_record
+
+
+@pytest.fixture(scope="function")
+def create_pidstore(db):
+    def _create_pidstore(object_uuid, pid_type, pid_value):
+        return PersistentIdentifierFactory(
+            object_uuid=object_uuid, pid_type=pid_type, pid_value=pid_value
+        )
+
+    return _create_pidstore

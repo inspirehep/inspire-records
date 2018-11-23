@@ -24,24 +24,122 @@
 
 from __future__ import absolute_import, division, print_function
 
+import pytest
+import uuid
+from mock import patch, MagicMock
+from helpers.providers.faker import faker
+
+from invenio_records.models import RecordMetadata
+from invenio_pidstore.models import PersistentIdentifier
+from invenio_pidstore.errors import PIDAlreadyExists
+from jsonschema import ValidationError
+
 from inspire_records.api import LiteratureRecord
 
-from helpers.factories.models.invenio_records import RecordMetadataFactory
+
+def test_literature_create(base_app, db):
+    data = faker.record()
+    record = LiteratureRecord.create(data)
+
+    control_number = str(record["control_number"])
+    record_db = RecordMetadata.query.filter_by(id=record.id).one()
+
+    assert record == record_db.json
+
+    record_pid = PersistentIdentifier.query.filter_by(
+        pid_type="lit", pid_value=str(control_number)
+    ).one()
+
+    assert record.model.id == record_pid.object_uuid
+    assert control_number == record_pid.pid_value
 
 
-def test_base_get_record(base_app, db):
-    record = RecordMetadataFactory()
+def test_literature_create_with_existing_control_number(base_app, db, create_pidstore):
+    data = faker.record(with_control_number=True)
+    existing_object_uuid = uuid.uuid4()
 
-    expected_record = LiteratureRecord.get_record(record.id)
+    create_pidstore(
+        object_uuid=existing_object_uuid,
+        pid_type="lit",
+        pid_value=data["control_number"],
+    )
 
-    assert expected_record == record.json
+    with pytest.raises(PIDAlreadyExists):
+        record = LiteratureRecord.create(data)
 
 
-def test_base_get_records(base_app, db):
-    records = RecordMetadataFactory.create_batch(20)
-    record_uuids = [record.id for record in records]
+def test_literature_create_with_invalid_data(base_app, db, create_pidstore):
+    data = faker.record(with_control_number=True)
+    data["invalid_key"] = "should throw an error"
+    record_control_number = data["control_number"]
 
-    expected_records = LiteratureRecord.get_records(record_uuids)
+    with pytest.raises(ValidationError):
+        record = LiteratureRecord.create(data)
 
-    for record in records:
-        assert record.json in expected_records
+    record_pid = PersistentIdentifier.query.filter_by(
+        pid_value=record_control_number
+    ).one_or_none()
+    assert record_pid is None
+
+
+def test_literature_update(base_app, db):
+    data = faker.record(with_control_number=True)
+    record = LiteratureRecord.create(data)
+
+    assert data["control_number"] == record["control_number"]
+
+    data.update({"titles": [{"title": "UPDATED"}]})
+    record.update(data)
+    control_number = str(record["control_number"])
+    record_updated_db = RecordMetadata.query.filter_by(id=record.id).one()
+
+    assert data == record_updated_db.json
+
+    record_updated_pid = PersistentIdentifier.query.filter_by(
+        pid_type="lit", pid_value=str(control_number)
+    ).one()
+
+    assert record.model.id == record_updated_pid.object_uuid
+    assert control_number == record_updated_pid.pid_value
+
+
+def test_literature_create_or_update_with_new_record(base_app, db):
+    data = faker.record()
+    record = LiteratureRecord.create_or_update(data)
+
+    control_number = str(record["control_number"])
+    record_db = RecordMetadata.query.filter_by(id=record.id).one()
+
+    assert record == record_db.json
+
+    record_pid = PersistentIdentifier.query.filter_by(
+        pid_type="lit", pid_value=str(control_number)
+    ).one()
+
+    assert record.model.id == record_pid.object_uuid
+    assert control_number == record_pid.pid_value
+
+
+def test_literature_create_or_update_with_existing_record(base_app, db):
+    data = faker.record(with_control_number=True)
+    record = LiteratureRecord.create(data)
+
+    assert data["control_number"] == record["control_number"]
+
+    data.update({"titles": [{"title": "UPDATED"}]})
+
+    record_updated = LiteratureRecord.create_or_update(data)
+    control_number = str(record_updated["control_number"])
+
+    assert record["control_number"] == record_updated["control_number"]
+
+    record_updated_db = RecordMetadata.query.filter_by(id=record_updated.id).one()
+
+    assert data == record_updated_db.json
+
+    record_updated_pid = PersistentIdentifier.query.filter_by(
+        pid_type="lit", pid_value=str(control_number)
+    ).one()
+
+    assert record_updated.model.id == record_updated_pid.object_uuid
+    assert control_number == record_updated_pid.pid_value

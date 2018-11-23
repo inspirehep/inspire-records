@@ -23,3 +23,8 @@
 """INSPIRE module that adds more fun to the platform."""
 
 from __future__ import absolute_import, division, print_function
+
+
+INSPIRE_RECORDS_PID_TYPES_TO_ENDPOINTS = {"lit": "literature"}
+
+INSPIRE_RECORDS_PID_TYPES_TO_SCHEMA = {"hep": "lit"}

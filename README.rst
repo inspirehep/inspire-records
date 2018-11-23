@@ -35,3 +35,9 @@ About
 =====
 
 INSPIRE module that adds more fun to the platform.
+
+Style Guide
+===========
+
+* ``Napoleon`` https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html for docstrings
+* ``Black`` https://github.com/ambv/black

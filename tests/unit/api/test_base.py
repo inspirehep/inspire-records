@@ -20,20 +20,22 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
-
 from __future__ import absolute_import, division, print_function
 
+import pytest
+from mock import patch, MagicMock
 
-from .base import InspireRecord
-from ..pidstore.api import PidStoreLiterature
+from helpers.providers.faker import faker
+
+from inspire_records.api import InspireRecord
 
 
-class LiteratureRecord(InspireRecord):
-    """Literature Record."""
+def test_strip_empty_values():
+    empty_fields = {"empty_string": "", "empty_array": [], "empty_dict": {}}
+    data = faker.record()
+    data.update(empty_fields)
+    data_stripped = InspireRecord.strip_empty_values(data)
 
-    pid_type = "lit"
-
-    @staticmethod
-    def mint(record_uuid, data):
-        PidStoreLiterature.mint(record_uuid, data)
+    assert "empty_string" not in data_stripped
+    assert "empty_array" not in data_stripped
+    assert "empty_dict" not in data_stripped
