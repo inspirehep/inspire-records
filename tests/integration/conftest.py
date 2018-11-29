@@ -41,6 +41,8 @@ def app_config(app_config):
     # for a specific test you can chagne create fixture per-directory
     # using ``conftest.py`` or per-file.
     app_config["JSONSCHEMAS_HOST"] = "localhost:5000"
+    # FIXME move this on the invenio instance
+    app_config["SEARCH_ELASTIC_HOSTS"] = "test-indexer"
     return app_config
 
 

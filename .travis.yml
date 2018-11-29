@@ -23,20 +23,12 @@
 notifications:
   email: false
 
+services:
+  - docker
+
 sudo: false
 
 language: python
-
-cache: pip
-
-python:
-  - 3.6
-
-services:
-  - postgresql
-
-addons:
-  postgresql: "9.6"
 
 matrix:
   fast_finish: true
@@ -47,23 +39,32 @@ before_install:
 
 env:
   global:
-    - ES_VERSION=5.6.4 ES_DOWNLOAD_URL=https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-${ES_VERSION}.tar.gz
+    - DOCKER_DATA="$HOME/docker_data"
+    - DOCKER_COMPOSE_VERSION=1.13.0
+    - BASE_USER_UID=2000
+    - BASE_USER_GID=2000
   matrix:
     - SUITE=integration
     - SUITE=unit
 
-install:
-  - wget ${ES_DOWNLOAD_URL}
-  - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
-  - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
-  - travis_retry pip install -e .[tests,all]
+before_install:
+  - travis_retry pip install coveralls
+  # See: https://docs.travis-ci.com/user/docker/#Using-Docker-Compose
+  - sudo rm -f /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 
 script:
-  - wget -q --waitretry=1 --retry-connrefused -T 10 -O - http://127.0.0.1:9200
-  - travis_retry pytest tests/${SUITE}
+  - docker-compose -f docker-compose.test.yml run --rm ${SUITE}
 
 after_success:
   - coveralls
 
 after_script:
+  # Killing via SIGTERM in order to trigger atexit and dump coverage information in WSGI.
+  - docker-compose -f docker-compose.test.yml kill -s SIGTERM
+  - docker-compose -f docker-compose.test.yml rm -f
+  # Coverage report contains Docker paths. We replace them, so that we can run Coveralls.
   - sed -i 's@\"/code/@'"\"$(pwd)/"'@g' .coverage
+  - coveralls

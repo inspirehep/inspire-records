@@ -71,7 +71,7 @@ def test_literature_create_with_existing_control_number(base_app, db, create_pid
 def test_literature_create_with_invalid_data(base_app, db, create_pidstore):
     data = faker.record(with_control_number=True)
     data["invalid_key"] = "should throw an error"
-    record_control_number = data["control_number"]
+    record_control_number = str(data["control_number"])
 
     with pytest.raises(ValidationError):
         record = LiteratureRecord.create(data)

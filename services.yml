@@ -20,29 +20,27 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""INSPIRE module that adds more fun to the platform."""
+version: '2.1'
 
-from __future__ import absolute_import, division, print_function
+services:
+  base:
+    image: python:3.7
+    tty: true
 
-import pytest
+  indexer:
+    image: inspirehep/elasticsearch5
+    command: bash -c "chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/data && gosu elasticsearch env ES_JAVA_OPTS=\"-Xms2g -Xmx2g\" elasticsearch -Ecluster.name=inspire-dev"
+    entrypoint: /docker-entrypoint.sh
 
-from helpers.factories.models.invenio_records import RecordMetadataFactory
+  database:
+    image: postgres:9.4.5
+    environment:
+      - POSTGRES_PASSWORD=dbpass123
+      - POSTGRES_USER=inspirehep
+      - PGDATA=/var/lib/postgresql/data/pgdata
 
-from invenio_pidstore.models import PIDStatus
-
-from inspire_records.pidstore.providers.recid import InspireRecordIdProvider
-
-
-def test_provider_with_legacy_provider(base_app, db, requests_mock):
-    requests_mock.get(
-        "http://someurl.com", text="1", headers={"Content-Type": "application/json"}
-    )
-
-    record = RecordMetadataFactory()
-
-    provide = {"object_type": "rec", "object_uuid": record.id, "pid_type": "pid"}
-    provider = InspireRecordIdProvider.create(**provide)
-
-    assert provider.pid.pid_value == 1
-    assert "pid" == provider.pid.pid_type
-    assert PIDStatus.REGISTERED == provider.pid.status
+  static:
+    image: busybox
+    volumes:
+        - ".:/code"
+        - "${DOCKER_DATA}/tmp/virtualenv:/virtualenv"

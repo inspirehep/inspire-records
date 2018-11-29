@@ -41,3 +41,11 @@ Style Guide
 
 * ``Napoleon`` https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html for docstrings
 * ``Black`` https://github.com/ambv/black
+
+Tests
+=====
+
+.. code-block:: console
+
+    $ docker-compose -f docker-compose.test.yml run integration
+    $ docker-compose -f docker-compose.test.yml run unit

@@ -34,7 +34,7 @@ def test_minter_without_control_number(base_app, db):
     record = RecordMetadataFactory()
     data = record.json
 
-    control_number = recid_minter(record.id, data, "pid_type", "rec")
+    control_number = recid_minter(record.id, data, "pid", "rec")
 
     assert control_number.pid_value == data["control_number"]
 
@@ -44,7 +44,7 @@ def test_minter_with_control_number(base_app, db):
     data = record.json
     data["control_number"] = 1
 
-    control_number = recid_minter(record.id, data, "pid_type", "rec")
+    control_number = recid_minter(record.id, data, "pid", "rec")
 
     assert control_number.pid_value == 1
 
@@ -55,4 +55,4 @@ def test_minter_with_missing_schema_key(base_app, db):
     del data["$schema"]
 
     with pytest.raises(MissingSchema):
-        recid_minter(record.id, data, "pid_type", "rec")
+        recid_minter(record.id, data, "pid", "rec")

@@ -36,11 +36,11 @@ from inspire_records.pidstore.providers.recid import InspireRecordIdProvider
 def test_provider_without_pid_value(base_app, db):
     record = RecordMetadataFactory()
 
-    provide = {"object_type": "rec", "object_uuid": record.id, "pid_type": "something"}
+    provide = {"object_type": "rec", "object_uuid": record.id, "pid_type": "pid"}
     provider = InspireRecordIdProvider.create(**provide)
 
     assert provider.pid.pid_value
-    assert "something" == provider.pid.pid_type
+    assert "pid" == provider.pid.pid_type
     assert PIDStatus.REGISTERED == provider.pid.status
 
 
@@ -50,11 +50,11 @@ def test_provider_with_pid_value(base_app, db):
     provide = {
         "object_type": "rec",
         "object_uuid": record.id,
-        "pid_type": "something",
+        "pid_type": "pid",
         "pid_value": 1,
     }
     provider = InspireRecordIdProvider.create(**provide)
 
     assert provider.pid.pid_value == 1
-    assert "something" == provider.pid.pid_type
+    assert "pid" == provider.pid.pid_type
     assert PIDStatus.REGISTERED == provider.pid.status
