@@ -24,6 +24,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import random
 import pytest
 
 from invenio_app.factory import create_app as invenio_create_app
@@ -109,7 +110,9 @@ def create_record(db, es_clear):
     def _create_record(record_type, data=None, with_pid=True, with_indexing=False):
         # FIXME: find a better location
         MAP_PID_TYPE_TO_INDEX = {"lit": "records-hep"}
-        record = RecordMetadataFactory(data=data)
+
+        control_number = random.randint(1, 2147483647)
+        record = RecordMetadataFactory(data=data, control_number=control_number)
 
         if with_pid:
             record._persistent_identifier = PersistentIdentifierFactory(

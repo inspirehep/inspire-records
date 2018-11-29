@@ -43,7 +43,7 @@ def test_base_get_record(base_app, db, create_record):
 
 
 def test_base_get_records(base_app, db, create_record):
-    records = [create_record("lit")]
+    records = [create_record("lit"), create_record("lit"), create_record("lit")]
     record_uuids = [record.id for record in records]
 
     expected_records = InspireRecord.get_records(record_uuids)

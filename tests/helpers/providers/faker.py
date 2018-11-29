@@ -26,10 +26,10 @@ from __future__ import absolute_import, division, print_function
 
 import pytest
 
-from faker import Faker
+from faker import Factory
 
 from helpers.providers.record_provider import RecordProvider
 
-faker = Faker()
+faker = Factory.create()
 
 faker.add_provider(RecordProvider)
