@@ -31,8 +31,45 @@ from inspire_dojson.utils import strip_empty_values
 from inspire_schemas.api import validate as schema_validate
 from invenio_pidstore.errors import PIDDoesNotExistError
 from invenio_records_files.api import Record
+from invenio_records.models import RecordMetadata
 from invenio_db import db
 
+from sqlalchemy import Text, or_, not_, cast, type_coerce
+from sqlalchemy.dialects.postgresql import JSONB
+
+class InspireQueryBuilderError(Exception):
+    pass
+
+class InspireQueryBuilder:
+
+    def __init__(self):
+        self._query = RecordMetadata.query 
+        self._filters = []
+
+    def not_deleted(self):
+        expression = or_(
+                        not_(
+                            type_coerce(RecordMetadata.json, JSONB).has_key('deleted')),
+                            not_(RecordMetadata.json['deleted'] == cast(True, JSONB)
+                        )
+                    )
+        return self.filter(expression)
+
+    def by_collections(self, collections):
+        expression = type_coerce(RecordMetadata.json, JSONB)['_collections'].contains(collections)
+        return self.filter(expression)
+
+    def filter(self, expression):
+        self._query = self._query.filter(expression)
+        return self
+
+    def no_duplicates(self):
+        self._query = self._query.distinct(RecordMetadata.json['control_number'])
+        return self
+
+    def query(self):
+        return self._query
+        
 
 class InspireRecord(Record):
     """Inspire Record."""
@@ -49,6 +86,10 @@ class InspireRecord(Record):
 
     def validate(self):
         schema_validate(self)
+
+    @staticmethod
+    def query_builder():
+        return InspireQueryBuilder()
 
     @classmethod
     def get_uuid_from_pid_value(cls, pid_value, pid_type=None):
