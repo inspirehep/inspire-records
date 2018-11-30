@@ -42,6 +42,15 @@ Style Guide
 * ``Napoleon`` https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html for docstrings
 * ``Black`` https://github.com/ambv/black
 
+
+Install ``Black`` pre-commit:
+-----------------------------
+
+.. code-block:: console
+
+    $ pre-commit install
+
+
 Tests
 =====
 
