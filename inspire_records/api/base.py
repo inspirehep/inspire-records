@@ -37,26 +37,22 @@ from invenio_db import db
 from sqlalchemy import Text, or_, not_, cast, type_coerce
 from sqlalchemy.dialects.postgresql import JSONB
 
-class InspireQueryBuilderError(Exception):
-    pass
 
-class InspireQueryBuilder:
-
+class InspireQueryBuilder(object):
     def __init__(self):
-        self._query = RecordMetadata.query 
-        self._filters = []
+        self._query = RecordMetadata.query
 
     def not_deleted(self):
         expression = or_(
-                        not_(
-                            type_coerce(RecordMetadata.json, JSONB).has_key('deleted')),
-                            not_(RecordMetadata.json['deleted'] == cast(True, JSONB)
-                        )
-                    )
+            not_(type_coerce(RecordMetadata.json, JSONB).has_key("deleted")),
+            not_(RecordMetadata.json["deleted"] == cast(True, JSONB)),
+        )
         return self.filter(expression)
 
     def by_collections(self, collections):
-        expression = type_coerce(RecordMetadata.json, JSONB)['_collections'].contains(collections)
+        expression = type_coerce(RecordMetadata.json, JSONB)["_collections"].contains(
+            collections
+        )
         return self.filter(expression)
 
     def filter(self, expression):
@@ -64,12 +60,12 @@ class InspireQueryBuilder:
         return self
 
     def no_duplicates(self):
-        self._query = self._query.distinct(RecordMetadata.json['control_number'])
+        self._query = self._query.distinct(RecordMetadata.json["control_number"])
         return self
 
     def query(self):
         return self._query
-        
+
 
 class InspireRecord(Record):
     """Inspire Record."""
