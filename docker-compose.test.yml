@@ -23,40 +23,18 @@
 version: '2.1'
 
 services:
-  test-pip:
-    extends:
-      file: services.yml
-      service: base
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
     volumes_from:
       - test-static
-    working_dir: /code
-    environment:
-      - VENV_PATH=/virtualenv
-
-  test-service_base:
-    extends:
-      file: services.yml
-      service: base
     environment:
       - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://inspirehep:dbpass123@test-database:5432/inspirehep
       - CELERY_BROKER_URL=pyamqp://guest:guest@test-rabbitmq:5672//
       - CELERY_RESULT_BACKEND=redis://test-redis:6379/1
       - CACHE_REDIS_URL=redis://test-redis:6379/0
-  
-  unit:
-    extends:
-      service: test-service_base
-    volumes_from:
-      - test-static
-    command: bash -c "cd /code && pip install --editable .[all,tests] --upgrade && pytest tests/unit"
-    working_dir: /virtualenv
-
-  integration:
-    extends:
-      service: test-service_base
-    command: bash -c "cd /code && pip install --editable .[all,tests] --upgrade && pytest tests/integration"
-    volumes_from:
-      - test-static
+      - SEARCH_ELASTIC_HOSTS=test-indexer
     depends_on:
       test-database:
         condition: service_healthy
@@ -84,7 +62,7 @@ services:
     healthcheck:
       timeout: 5s
       interval: 5s
-      retries: 5
+      retries: 10
       test:
         - "CMD-SHELL"
         - "curl http://localhost:9200/_cluster/health | grep '.status.:.\\(green\\|yellow\\)'"

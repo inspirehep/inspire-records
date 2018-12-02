@@ -43,6 +43,8 @@ def app_config(app_config):
     app_config["JSONSCHEMAS_HOST"] = "localhost:5000"
     # FIXME move this on the invenio instance
     app_config["SEARCH_ELASTIC_HOSTS"] = "test-indexer"
+    app_config["INSPIRE_RECORDS_PID_TYPES_TO_ENDPOINTS"] = {"lit": "literature"}
+    app_config["INSPIRE_RECORDS_PID_TYPES_TO_SCHEMA"] = {"hep": "lit"}
     return app_config
 
 

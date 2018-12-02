@@ -56,7 +56,7 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 
 script:
-  - docker-compose -f docker-compose.test.yml run --rm ${SUITE}
+  - docker-compose -f docker-compose.test.yml run --rm tests py.test tests/${SUITE}
 
 after_success:
   - coveralls
