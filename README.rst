@@ -50,3 +50,10 @@ Tests
     $ docker-compose -f docker-compose.test.yml build 
     $ docker-compose -f docker-compose.test.yml run --rm tests py.test tests/unit
     $ docker-compose -f docker-compose.test.yml run --rm tests py.test tests/integration
+
+Run a specific test
+-------------------
+
+.. code-block:: console
+
+    $ docker-compose -f docker-compose.test.yml exec tests pytest tests/integration/api/test_api_base.py --pdb -s
