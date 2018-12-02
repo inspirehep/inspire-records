@@ -46,6 +46,7 @@ Tests
 =====
 
 .. code-block:: console
+
     $ docker-compose -f docker-compose.test.yml build 
     $ docker-compose -f docker-compose.test.yml run --rm tests py.test tests/unit
     $ docker-compose -f docker-compose.test.yml run --rm tests py.test tests/integration
