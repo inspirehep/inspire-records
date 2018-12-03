@@ -39,6 +39,8 @@ services:
       - test-indexer
       - test-database
       - test-redis
+    volumes:
+      - .:/code
 
   test-redis:
     image: redis:3.2.3
