@@ -117,6 +117,24 @@ class InspireRecord(Record):
             self.model.json = self
             db.session.add(self.model)
 
+    def redirect(self, other):
+        """Redirect pidstore of current record to the other one.
+
+        Args:
+            other (InspireRecord): The record that self is going to be redirected.
+        """
+        self_pids = PersistentIdentifier.query.filter(
+            PersistentIdentifier.object_uuid == self.id
+        ).all()
+        other_pid = PersistentIdentifier.query.filter(
+            PersistentIdentifier.object_uuid == other.id
+        ).one()
+        with db.session.begin_nested():
+            for pid in self_pids:
+                pid.redirect(other_pid)
+                db.session.add(pid)
+            self._mark_deleted()
+
     @classmethod
     def create_or_update(cls, data, **kwargs):
         control_number = data.get("control_number")
@@ -135,6 +153,9 @@ class InspireRecord(Record):
             for pid in pids:
                 pid.delete()
                 db.session.delete(pid)
+        self._mark_deleted()
+
+    def _mark_deleted(self):
         self["deleted"] = True
 
     def hard_delete(self):

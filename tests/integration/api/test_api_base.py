@@ -164,3 +164,24 @@ def test_hard_delete_record(base_app, db, create_record, create_pidstore):
     assert record is None
     assert record_pids is None
     assert record_identifier is None
+
+
+def test_redirect_records(base_app, db, create_record):
+    current_factory = create_record("lit")
+    other_factory = create_record("lit")
+
+    current = InspireRecord.get_record(current_factory.id)
+    other = InspireRecord.get_record(other_factory.id)
+
+    current.redirect(other)
+    
+    current_pids = PersistentIdentifier.query.filter(
+        PersistentIdentifier.object_uuid == current_factory.id
+    ).all()
+    other_pid = PersistentIdentifier.query.filter(
+        PersistentIdentifier.object_uuid == other_factory.id
+    ).one()
+
+    assert current['deleted'] is True
+    for current_pid in current_pids:
+        assert current_pid.get_redirect() == other_pid
