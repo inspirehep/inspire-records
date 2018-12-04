@@ -39,7 +39,7 @@ install_requires = [
     "invenio-records-files>=1.0.0a10",
     "invenio-jsonschemas~=1.0,>=1.0.0",
     "invenio-db[postgresql,versioning]~=1.0,>=1.0.0",
-    "inspire-schemas~=58.0,>=58.0.0",
+    "inspire-schemas~=59.0,>=59.0.0",
     "invenio-indexer~=1.0,>=1.0.0",
     "invenio-search[elasticsearch5]~=1.0.2,<1.1.0",
     "invenio-cache~=1.0,>=1.0.0",
