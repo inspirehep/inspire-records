@@ -41,9 +41,10 @@ install_requires = [
     "invenio-db[postgresql,versioning]~=1.0,>=1.0.0",
     "inspire-schemas~=59.0,>=59.0.0",
     "invenio-indexer~=1.0,>=1.0.0",
+    "flask-shell-ipython==0.3.1",
     "invenio-search[elasticsearch5]~=1.0.2,<1.1.0",
     "invenio-cache~=1.0,>=1.0.0",
-    "inspire-dojson~=60.0,>=60.0.6",
+    "inspire-dojson~=61.0,>=61.0.0",
 ]
 
 docs_require = []
